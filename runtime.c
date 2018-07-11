@@ -14,12 +14,22 @@
 #include <string.h>
 #include <stdint.h>
 #include <dlfcn.h>
+// [port] CHANGED: Not needed.
+#if !defined(OBJC_PORT)
 #include <os/assumes.h>
+#endif
+// [port] CHANGED: Porting os_* macros.
+#if defined(OBJC_PORT)
+#include <assert.h>
+#define os_assert(x) assert(x)
+#define os_assumes(x) (x)
+#else
 #ifndef os_assumes
 #define os_assumes(_x) os_assumes(_x)
 #endif
 #ifndef os_assert
 #define os_assert(_x) os_assert(_x)
+#endif
 #endif
 
 #if TARGET_OS_WIN32
@@ -202,7 +212,12 @@ void *_Block_copy(const void *arg) {
     }
     else {
         // Its a stack block.  Make a copy.
+        // [port] CHANGED: [ptr-conversion].
+#if defined(OBJC_PORT)
+        struct Block_layout *result = (__typeof__(result))malloc(aBlock->descriptor->size);
+#else
         struct Block_layout *result = malloc(aBlock->descriptor->size);
+#endif
         if (!result) return NULL;
         memmove(result, aBlock, aBlock->descriptor->size); // bitcopy first
         // reset refcount
@@ -346,7 +361,12 @@ bool _Block_has_signature(void *aBlock) {
 
 const char * _Block_signature(void *aBlock)
 {
+    // [port] CHANGED: [ptr-conversion].
+#if defined(OBJC_PORT)
+    struct Block_descriptor_3 *desc3 = _Block_descriptor_3((struct Block_layout *)aBlock);
+#else
     struct Block_descriptor_3 *desc3 = _Block_descriptor_3(aBlock);
+#endif
     if (!desc3) return NULL;
 
     return desc3->signature;
@@ -358,7 +378,12 @@ const char * _Block_layout(void *aBlock)
     struct Block_layout *layout = (struct Block_layout *)aBlock;
     if (layout->flags & BLOCK_HAS_EXTENDED_LAYOUT) return NULL;
 
+    // [port] CHANGED: [ptr-conversion].
+#if defined(OBJC_PORT)
+    struct Block_descriptor_3 *desc3 = _Block_descriptor_3((struct Block_layout *)aBlock);
+#else
     struct Block_descriptor_3 *desc3 = _Block_descriptor_3(aBlock);
+#endif
     if (!desc3) return NULL;
 
     return desc3->layout;
@@ -370,7 +395,12 @@ const char * _Block_extended_layout(void *aBlock)
     struct Block_layout *layout = (struct Block_layout *)aBlock;
     if (! (layout->flags & BLOCK_HAS_EXTENDED_LAYOUT)) return NULL;
 
+    // [port] CHANGED: [ptr-conversion].
+#if defined(OBJC_PORT)
+    struct Block_descriptor_3 *desc3 = _Block_descriptor_3((struct Block_layout *)aBlock);
+#else
     struct Block_descriptor_3 *desc3 = _Block_descriptor_3(aBlock);
+#endif
     if (!desc3) return NULL;
 
     // Return empty string (all non-object bytes) instead of NULL 
