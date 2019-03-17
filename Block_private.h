@@ -227,6 +227,14 @@ typedef struct Block_callbacks_RR Block_callbacks_RR;
 
 BLOCK_EXPORT void _Block_use_RR2(const Block_callbacks_RR *callbacks);
 
+// [port] CHANGED: Copied from WinObjC's `blocks_private.h`. This is needed by
+// [port] `libdispatch`.
+struct Block_basic {
+	void *isa;
+	int flags;
+	int reserved;
+	void (*Block_invoke)(void *);
+};
 
 #if __cplusplus
 }
