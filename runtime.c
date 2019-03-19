@@ -170,12 +170,22 @@ static struct Block_descriptor_3 * _Block_descriptor_3(struct Block_layout *aBlo
     return (struct Block_descriptor_3 *)desc;
 }
 
+// [port] CHANGED: See `IpaSimLibrary` for implementation.
+#if defined(OBJC_PORT)
+extern "C" __declspec(dllimport) void ipaSim_callBack1(void *FP, void *arg0);
+extern "C" __declspec(dllimport) void ipaSim_callBack2(void *FP, void *arg0, void *arg1);
+#endif
+
 static void _Block_call_copy_helper(void *result, struct Block_layout *aBlock)
 {
     struct Block_descriptor_2 *desc = _Block_descriptor_2(aBlock);
     if (!desc) return;
 
+#if defined(OBJC_PORT)
+    ipaSim_callBack2((void *)desc->copy, result, aBlock);
+#else
     (*desc->copy)(result, aBlock); // do fixup
+#endif
 }
 
 static void _Block_call_dispose_helper(struct Block_layout *aBlock)
@@ -183,7 +193,11 @@ static void _Block_call_dispose_helper(struct Block_layout *aBlock)
     struct Block_descriptor_2 *desc = _Block_descriptor_2(aBlock);
     if (!desc) return;
 
+#if defined(OBJC_PORT)
+    ipaSim_callBack1((void *)desc->dispose, aBlock);
+#else
     (*desc->dispose)(aBlock);
+#endif
 }
 
 /*******************************************************************************
@@ -264,7 +278,11 @@ static struct Block_byref *_Block_byref_copy(const void *arg) {
                 copy3->layout = src3->layout;
             }
 
+#if defined(OBJC_PORT)
+            ipaSim_callBack2((void *)src2->byref_keep, copy, src);
+#else
             (*src2->byref_keep)(copy, src);
+#endif
         }
         else {
             // Bitwise copy.
@@ -292,7 +310,11 @@ static void _Block_byref_release(const void *arg) {
         if (latching_decr_int_should_deallocate(&byref->flags)) {
             if (byref->flags & BLOCK_BYREF_HAS_COPY_DISPOSE) {
                 struct Block_byref_2 *byref2 = (struct Block_byref_2 *)(byref+1);
+#if defined(OBJC_PORT)
+                ipaSim_callBack1((void *)byref2->byref_destroy, byref);
+#else
                 (*byref2->byref_destroy)(byref);
+#endif
             }
             free(byref);
         }
