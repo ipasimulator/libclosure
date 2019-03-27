@@ -172,8 +172,8 @@ static struct Block_descriptor_3 * _Block_descriptor_3(struct Block_layout *aBlo
 
 // [port] CHANGED: See `IpaSimLibrary` for implementation.
 #if defined(OBJC_PORT)
-extern "C" __declspec(dllimport) void ipaSim_callBack1(void *FP, void *arg0);
-extern "C" __declspec(dllimport) void ipaSim_callBack2(void *FP, void *arg0, void *arg1);
+extern "C" __declspec(dllimport) void ipaSim_callBack1(void *FP, void *Arg0);
+extern "C" __declspec(dllimport) void ipaSim_callBack2(void *FP, void *Arg0, void *Arg1);
 #endif
 
 static void _Block_call_copy_helper(void *result, struct Block_layout *aBlock)
